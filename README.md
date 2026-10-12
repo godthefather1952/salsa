@@ -121,5 +121,5 @@ Each generated transaction also carries a `truthCategory`, the answer key used t
 - [x] **Sandbox.** Two fake banks, bank API keys, the bank-to-Salsa token handshake, and a widget preview showing loan interest.
 - [ ] **Phase 2: Opportunity Feed.** Tax rules for 2026, categorizer, tax engine with Verified / Potential / Needs information findings, review workflow, bank configuration and controlled embedding, Discover and My Review. See the [Phase 2 plan](docs/architecture/phase-2-plan.md).
 - [ ] **Phase 3: Summary.** Year-at-a-glance comparison, estimated tax effect, documents to keep, document handling.
-- [ ] **Phase 4: Bank readiness.** Data feed ingestion, row-level security, rate limits, API reference, retention policies, admin configuration.
+- [ ] **Phase 4: Bank readiness.** Data feed ingestion, rate limits, API reference, retention policies, field-level encryption review, admin configuration.
 - [ ] **Phase 5: Launch polish.** Deployment, demo video, architecture diagrams.

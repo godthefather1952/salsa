@@ -85,6 +85,7 @@ Unchanged by the refinements (R5): bank-first branding and a subtle "Powered by 
 - **S4** The widget makes no requests to third-party hosts.
 - **S5** Tokens are never written to storage, logs or URLs other than the initial fragment.
 - **S6** Every token names a server-side widget session; a revoked or unknown session is rejected even before the token expires, and every audit event records the session id.
+- **S7** Row-level security (PR 4): every tenant-owned table has `FORCE ROW LEVEL SECURITY` with policies for all four operations; with no tenant context nothing is visible or writable; cross-tenant reads, inserts, updates and deletes all fail; the application role has neither `BYPASSRLS` nor superuser and owns no tables; interleaved requests over a single pooled connection never carry tenant context over.
 
 ## Ownership, visibility and tax units (PR 4, PR 7, refinement R4)
 

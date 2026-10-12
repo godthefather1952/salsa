@@ -39,7 +39,7 @@ flowchart LR
 | Bank page to widget | Only pages on the bank's registered origins may embed the widget | `frame-ancestors` per tenant, origin-checked `postMessage` (Phase 2, PR 8) |
 | Widget to Salsa | One customer at one bank, for 15 minutes | HMAC-signed widget token naming tenant and customer |
 | Person to person | Each person's tax information is private; joint owners and spouses see each other's information only through a shared tax unit both accepted | Separate ownership, visibility and tax unit permissions ([ADR 0010](../decisions/0010-ownership-visibility-and-tax-unit-access.md)) |
-| Salsa to database | Every query names a tenant | `tenant_id` on every row, composite foreign keys, later Postgres row-level security |
+| Salsa to database | Every query names a tenant | `tenant_id` on every row, composite foreign keys, Postgres row-level security from PR 4 ([ADR 0015](../decisions/0015-database-enforced-tenant-isolation.md)) |
 
 ## Layers inside Salsa
 
@@ -84,6 +84,6 @@ packages/core          shared types: money, dates, accounts, API contracts
 | 9 | Tax year is always the current calendar year | January to April, customers need last year | Phase 2, PR 7 |
 | 10 | No audit trail of customer answers or corrections | Cannot reconstruct who changed what | Phase 2, PR 7 |
 | 11 | No rate limiting, no API reference for bank engineers | Abuse, slow integrations | Phase 4 |
-| 12 | Tenant isolation depends on every query remembering its filter | One missed filter leaks another bank's data | Phase 2: one data-access layer (PR 7); row-level security proposed for PR 4 ([ADR 0015](../decisions/0015-database-enforced-tenant-isolation.md)) |
+| 12 | Tenant isolation depends on every query remembering its filter | One missed filter leaks another bank's data | Phase 2: row-level security (PR 4) and one data-access layer (PR 7) ([ADR 0015](../decisions/0015-database-enforced-tenant-isolation.md)) |
 | 13 | Widget tokens cannot be revoked before expiry and carry no session id | A leaked token works for up to 15 minutes; audit records cannot name the session | Phase 2, PR 7: server-side widget sessions |
 | 14 | No encryption beyond what the database host provides | Sensitive financial data exposed if storage is compromised | Encryption at rest required before real data; field-level encryption evaluated in Phase 4 |

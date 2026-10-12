@@ -32,6 +32,14 @@ All design questions raised in the first draft were resolved by the product owne
 | R4 | Ownership, visibility and tax unit access are separate permissions; marriage or joint ownership never automatically exposes another person's private tax information | [ADR 0010](../../decisions/0010-ownership-visibility-and-tax-unit-access.md), [security](security.md#authorization), [states](states.md#9-tax-unit-membership) |
 | R5 | Bank-first branding and the subtle "Powered by Salsa" attribution are preserved exactly as specified | [ADR 0001](../../decisions/0001-bank-first-white-label.md), [branding](branding.md) (unchanged) |
 
+## Approvals after the architecture review
+
+| Item | Decision |
+| --- | --- |
+| Row-level security in PR 4 | Approved ([ADR 0015](../../decisions/0015-database-enforced-tenant-isolation.md)), with the product owner's requirements recorded there |
+| Married filing separately: "Does your spouse itemize?" | Approved; asked only of separate filers; the comparison waits for it ([states](states.md#6-deduction-comparison)) |
+| Other security and comparison corrections from the review (central authorization, server-side widget sessions, joint-return comparison) | Approved |
+
 ## Deferred design work
 
 These are intentionally left for later phases and do not block Phase 2.

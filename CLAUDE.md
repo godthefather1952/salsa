@@ -34,6 +34,7 @@ TypeScript everywhere, pnpm workspaces + Turborepo, Node 22.
 - Dates are ISO strings (`2026-03-14`), no time zones.
 - Amount sign convention is documented on `TRANSACTION_TYPES` in `packages/core/src/domain.ts`.
 - Every table has `tenant_id`; child tables use composite foreign keys that include it. Keep that pattern for new tables.
+- From PR 4, every tenant-owned table has forced row-level security that denies access without tenant context. The API uses a restricted role without `BYPASSRLS`, and sets the tenant only with transaction-scoped `set_config(..., true)` inside the data-access layer, never session-level `SET` (ADR 0015). Row-level security is an extra layer: keep central authorization and tenant-scoped queries too.
 - `truthCategory` on generated transactions is a test answer key. Never store it or let the categorizer read it.
 - Fixtures describe what a bank sees. Tax rules do not belong in fixtures.
 - Tax rules are per tax year, with a source link (IRS page or publication) next to every number.

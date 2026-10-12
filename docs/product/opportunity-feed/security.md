@@ -8,7 +8,7 @@ Every widget request is authorized in four layers, in this order ([ADR 0010](../
 
 | Layer | Rule | Enforced by |
 | --- | --- | --- |
-| Tenant | The token names one bank; every query filters on it | Token claims, composite foreign keys; Postgres row-level security added in Phase 4 |
+| Tenant | The token names one bank; every query filters on it | Token claims, composite foreign keys, Postgres row-level security from PR 4 that denies access without tenant context ([ADR 0015](../../decisions/0015-database-enforced-tenant-isolation.md)) |
 | Party | The token names one person; identifiers in URLs or request bodies never widen access | Token claims |
 | Account visibility | A person sees an account only with an active visibility grant from the bank, whether or not they own it | `account_visibility_grants`, checked on every account and transaction read |
 | Tax unit scope | A person sees another person's answers, decisions, reviews or income only through a shared tax unit both accepted, and only within the scopes the sharing member chose | `tax_unit_members` and sharing scopes |
@@ -18,7 +18,7 @@ Ownership, visibility and tax unit access are separate permissions. Marriage, a 
 All four layers are enforced by one authorization module, never re-implemented per endpoint:
 
 - Every route declares its policy when it is registered. The server refuses to start if a route has none (deny by default).
-- Route handlers read data only through the tenant-scoped data-access layer, which requires the verified tenant and party. Row-level security in the database is proposed as a further layer from PR 4 ([ADR 0015](../../decisions/0015-database-enforced-tenant-isolation.md)).
+- Route handlers read data only through the tenant-scoped data-access layer, which requires the verified tenant and party. Row-level security in the database is a further, independent layer from PR 4 ([ADR 0015](../../decisions/0015-database-enforced-tenant-isolation.md)); the authorization module and data-access layer do not rely on it.
 - A permission matrix test runs every endpoint against every combination of other tenant, other person on a joint account, revoked visibility grant, and non-member of a shared tax unit. Every combination must fail.
 
 ## Authenticated sessions
