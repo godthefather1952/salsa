@@ -1,13 +1,13 @@
 # 0006. Controlled embedding and session handling
 
-- Status: Accepted (requirements: tenant isolation, authenticated sessions, controlled embedding); Proposed (mechanism below)
+- Status: Accepted
 - Date: 2026-10-12
 
 ## Context
 
 Today any website can load the widget in an iframe, the widget posts messages to any parent (`*`), and fonts load from a third-party server. A widget showing financial data must only run inside its bank's pages and must not leak data to anyone else.
 
-## Decision (proposed mechanism)
+## Decision
 
 - **Per-tenant widget URL.** The widget is served at `/embed/{tenantPublicId}/`. The server sets `Content-Security-Policy: frame-ancestors` to that tenant's registered origins, so browsers refuse to render it anywhere else.
 - **Token and URL must agree.** The widget rejects a session token whose tenant differs from the URL's tenant.
@@ -19,5 +19,5 @@ Today any website can load the widget in an iframe, the widget posts messages to
 ## Consequences
 
 - Banks register their origins during onboarding; the sandbox registers `http://localhost:4000`.
-- Native mobile apps that load the widget in a webview need a registered origin or an app-specific embedding mode (open question).
+- Native mobile apps that load the widget in a webview register an origin for their webview host (design decision Q12). An app-specific embedding mode can be added with the first bank's mobile team if needed.
 - Session refresh adds one message type to the host integration, documented for bank engineers.

@@ -38,6 +38,7 @@ flowchart LR
 | Bank server to Salsa | The bank, for its own customers only | Per-tenant API key, stored only as a SHA-256 hash |
 | Bank page to widget | Only pages on the bank's registered origins may embed the widget | `frame-ancestors` per tenant, origin-checked `postMessage` (Phase 2, PR 8) |
 | Widget to Salsa | One customer at one bank, for 15 minutes | HMAC-signed widget token naming tenant and customer |
+| Person to person | Each person's tax information is private; joint owners and spouses see each other's information only through a shared tax unit both accepted | Separate ownership, visibility and tax unit permissions ([ADR 0010](../decisions/0010-ownership-visibility-and-tax-unit-access.md)) |
 | Salsa to database | Every query names a tenant | `tenant_id` on every row, composite foreign keys, later Postgres row-level security |
 
 ## Layers inside Salsa
@@ -54,7 +55,7 @@ packages/core          shared types: money, dates, accounts, API contracts
 ```
 
 - The **categorizer** says what a transaction is ("a payment to a religious organization"). It never says whether anything is deductible ([ADR 0002](../decisions/0002-separate-classification-from-tax-rules.md)).
-- The **tax engine** applies a year's **rules** to everything known about a customer and produces findings with a derived status ([ADR 0003](../decisions/0003-finding-status-derived-from-evidence.md)).
+- The **tax engine** applies a year's **rules** to everything known about a tax unit and produces findings with a derived status ([ADR 0003](../decisions/0003-finding-status-derived-from-evidence.md)). Income-dependent rules use the income measure each rule defines, supplied by the customer and never inferred from deposits ([ADR 0009](../decisions/0009-income-information.md)).
 - The **customer's review** is a separate record of what the customer checked, corrected and answered. It never sets a finding's status ([ADR 0004](../decisions/0004-customer-review-separate-from-engine-status.md)).
 
 ## Current state (end of Phase 1 and the sandbox)
@@ -74,7 +75,7 @@ packages/core          shared types: money, dates, accounts, API contracts
 | --- | --- | --- | --- |
 | 1 | Loan interest is summed from transactions instead of using lender tax records (Form 1098, Form 1098-VLI from 2026) | Wrong or unverifiable amounts | Phase 2, PR 4 |
 | 2 | Transactions have no pending/posted status and no link from a refund to its original | Refunded donations still count (false positive) | Phase 2, PR 4 |
-| 3 | One customer per account; one filer per bank customer assumed | Joint accounts, spouses at other banks, future business accounts do not fit | Phase 2, PR 4 ([ADR 0010](../decisions/0010-parties-and-account-holders.md)) |
+| 3 | One customer per account; one filer per bank customer assumed; no distinction between owning an account, seeing it, and sharing tax information | Joint accounts and spouses could expose private tax information; future business accounts do not fit | Phase 2, PR 4 and PR 7 ([ADR 0010](../decisions/0010-ownership-visibility-and-tax-unit-access.md)) |
 | 4 | Results computed per request and not kept | Cannot show what a customer saw, or why | Phase 2, PR 7 ([ADR 0011](../decisions/0011-saved-review-snapshots.md)) |
 | 5 | No ingestion contract; seed script writes tables directly | Every bank integration would be custom | Canonical types in Phase 2 (PR 4); ingestion API and file feeds in Phase 4 |
 | 6 | Branding is three values; wording hardcoded | Banks cannot rename the feature or add compliance text | Phase 2, PR 8 ([ADR 0005](../decisions/0005-branding-configuration-is-data.md)) |

@@ -2,18 +2,27 @@
 
 Decision records: [ADR 0005](../../decisions/0005-branding-configuration-is-data.md), [ADR 0006](../../decisions/0006-controlled-embedding-and-sessions.md).
 
-## Tenant isolation
+## Authorization
 
-- Every widget request carries a token naming one tenant and one customer. Every query filters on both, from the token only. Identifiers in URLs or request bodies never widen access.
-- The database rejects cross-tenant links through composite foreign keys (in place today); Postgres row-level security is added as a second layer in Phase 4.
-- Tests for every endpoint include a cross-tenant attempt that must fail.
+Every widget request is authorized in four layers, in this order ([ADR 0010](../../decisions/0010-ownership-visibility-and-tax-unit-access.md)):
+
+| Layer | Rule | Enforced by |
+| --- | --- | --- |
+| Tenant | The token names one bank; every query filters on it | Token claims, composite foreign keys; Postgres row-level security added in Phase 4 |
+| Party | The token names one person; identifiers in URLs or request bodies never widen access | Token claims |
+| Account visibility | A person sees an account only with an active visibility grant from the bank, whether or not they own it | `account_visibility_grants`, checked on every account and transaction read |
+| Tax unit scope | A person sees another person's answers, decisions, reviews or income only through a shared tax unit both accepted, and only within the scopes the sharing member chose | `tax_unit_members` and sharing scopes |
+
+Ownership, visibility and tax unit access are separate permissions. Marriage, a "married filing jointly" answer or joint account ownership never by itself grants access to another person's private tax information.
+
+Tests for every endpoint include a cross-tenant attempt, a cross-person attempt on a joint account, and a revoked-grant attempt, all of which must fail.
 
 ## Authenticated sessions
 
 - The bank authenticates the customer. Salsa never handles bank credentials.
 - The bank's server requests a widget session with its API key (hashed at rest, revocable, several active keys for rotation).
 - Widget tokens last 15 minutes, live only in memory in the widget (never in local storage or cookies), and are refreshed through the host before expiry.
-- Every answer, transaction decision and dismissal is recorded with the session that made it.
+- Every answer, transaction decision and dismissal is recorded with the person and session that made it.
 
 ## Controlled embedding
 
@@ -33,6 +42,8 @@ Bank configuration can never introduce scripts, HTML, stylesheets or remote reso
 ## Privacy
 
 - Data minimization: birth year rather than date of birth; no Social Security numbers; no full account numbers (last four only).
+- A person's answers, income ranges, decisions and reviews are private to them by default and are never shared with a spouse or joint owner without that person's consent through a shared tax unit.
+- Deposit data is never processed into an income figure about the customer.
 - Application logs never include transaction descriptions, amounts tied to customers, or answers. The audit table holds those, with restricted access.
 - No analytics or tracking in Phase 2.
 - Retention periods for evaluations, answers and audit events are agreed per bank before production (Phase 4).

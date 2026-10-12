@@ -39,6 +39,10 @@ TypeScript everywhere, pnpm workspaces + Turborepo, Node 22.
 - Amounts are never labeled as savings, refunds or money back. Tax effect is a separate, labeled estimate (ADR 0008).
 - Finding status (verified, potential, needs_information) is derived from evidence; merchant information alone is never verified (ADR 0003).
 - The customer's review status is separate from the engine's status and never sets it (ADR 0004).
+- Verified means eligibility supported by the information Salsa can evaluate, never guaranteed IRS acceptance; say so wherever Verified appears (ADR 0003).
+- Never treat deposits or gross household income as AGI or MAGI, and never pre-fill income answers. Each rule uses its own income measure; unsettled income conditions stay unknown (ADR 0009).
+- The deduction comparison leans only when its bounds support it; otherwise it is incomplete (states.md section 6).
+- Ownership, account visibility and tax unit access are separate permissions. Marriage or joint ownership never exposes another person's private tax information (ADR 0010).
 - Bank differences come only from validated configuration and design tokens. No bank-specific code branches; no HTML, scripts or remote URLs in configuration (ADR 0005).
 - The categorizer has no tax vocabulary; tax rules live in `tax-rules`, decisions in `tax-engine` (ADR 0002). No AI classifiers in Phase 2 (ADR 0007).
 - Use only fictional banks, people and merchants in fixtures and demos.

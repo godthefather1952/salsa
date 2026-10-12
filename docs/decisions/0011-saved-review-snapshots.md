@@ -1,6 +1,6 @@
 # 0011. Saved engine evaluations
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-12
 
 ## Context

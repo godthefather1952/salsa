@@ -10,7 +10,7 @@ Salsa is a white-label financial intelligence service that banks embed in their 
 
 ## Decisions
 
-[Architecture decision records](decisions/README.md). Each records one decision, its context and its consequences. Status is either **Accepted** (approved by the product owner) or **Proposed** (awaiting approval).
+[Architecture decision records](decisions/README.md). Each records one decision, its context and its consequences. All thirteen current records are **Accepted**.
 
 ## Product specification: Opportunity Feed
 
@@ -27,4 +27,4 @@ Salsa is a white-label financial intelligence service that banks embed in their 
 | [Accessibility](product/opportunity-feed/accessibility.md) | Requirements and how they are tested |
 | [Security and integration](product/opportunity-feed/security.md) | Isolation, sessions, embedding, configuration safety |
 | [Acceptance criteria](product/opportunity-feed/acceptance-criteria.md) | What "done" means for each part |
-| [Open questions](product/opportunity-feed/open-questions.md) | Design decisions still to make |
+| [Design decisions](product/opportunity-feed/design-decisions.md) | Approved design decisions, refinements, and deferred work |

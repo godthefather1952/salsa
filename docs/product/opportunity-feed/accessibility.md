@@ -35,8 +35,8 @@ Target: **WCAG 2.2 Level AA** for every view, in every bank's configuration. Ban
 | --- | --- |
 | Automated rule checks (axe-core) on every component and view, in both sandbox banks' configurations | Every pull request, in CI |
 | Configuration contrast validation | When a configuration is saved |
-| Keyboard-only walkthrough of J1 to J4 | Every pull request that changes the interface |
-| Screen reader walkthrough of J1 to J4 (VoiceOver iOS, TalkBack, NVDA) | Before each milestone sign-off |
+| Keyboard-only walkthrough of J1 to J4 and J8 | Every pull request that changes the interface |
+| Screen reader walkthrough of J1 to J4 and J8 (VoiceOver iOS, TalkBack, NVDA) | Before each milestone sign-off |
 | 320 px and 400% zoom review | Every pull request that changes layout |
 
 Automated checks find only part of the issues; the manual walkthroughs are required, not optional.

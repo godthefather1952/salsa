@@ -20,8 +20,8 @@ Goal: a working Opportunity Feed in the sandbox. Customers of both fictional ban
 ### B. Rules and data
 | PR | Delivers | Done when |
 | --- | --- | --- |
-| 3 | `packages/tax-rules`: federal individual rules for 2026 with IRS sources | Every figure has a source link and a test |
-| 4 | Bank data model: parties and account holders, tax units, lender tax records, pending/posted and reversals, customer facts; fixtures gain lender records and hard negative cases | Migrations apply; sandbox still works; fixtures cover the cases listed below |
+| 3 | `packages/tax-rules`: federal individual rules for 2026 with IRS sources, including each rule's income measure (AGI or that provision's MAGI) | Every figure and income-measure definition has a source link and a test |
+| 4 | Bank data model: parties, account holders (ownership), visibility grants, tax units and members (consent and scopes), lender tax records, pending/posted and reversals, customer facts owned by a party; fixtures gain lender records, hard negative cases, and Daniel Brooks (Maya's spouse, joint checking owner, separate customer) | Migrations apply; sandbox still works; fixtures cover the cases listed below; permission model tests pass |
 
 Hard negative fixture cases: purchase at a charity-run thrift store, raffle ticket, refunded donation, county vehicle registration fee, snacks bought at a pharmacy, doctor visit paid from an HSA, church bookstore purchase.
 
@@ -33,12 +33,12 @@ Hard negative fixture cases: purchase at a charity-run thrift store, raffle tick
 ### D. Engine
 | PR | Delivers | Done when |
 | --- | --- | --- |
-| 6 | Rule evaluation: findings, information requests, deduction comparison, benefit estimate, review progress | Each persona's expected outcome is a passing test |
+| 6 | Rule evaluation: findings, information requests, deduction comparison with incomplete, provisional and complete states, benefit estimate method, review progress | Each persona's expected outcome is a passing test; comparison bounds tests pass; no evaluation reads deposits as income |
 
 ### E. Integration and platform
 | PR | Delivers | Done when |
 | --- | --- | --- |
-| 7 | Review API: saved evaluations, findings, transaction decisions, answers, reviews, audit events, explicit tax year | Every endpoint is tenant and customer scoped and tested for cross-tenant access |
+| 7 | Review API: saved evaluations, findings, transaction decisions, answers, reviews, audit events, explicit tax year; four-layer authorization (tenant, party, visibility, tax unit scope) | Every endpoint is tested for cross-tenant, cross-person (joint account) and revoked-grant access |
 | 8 | Experience configuration and controlled embedding: versioned config, validation, per-tenant `frame-ancestors`, origin-restricted messaging, session refresh, self-hosted fonts | Unsafe configs are rejected; unregistered origins cannot embed |
 
 ### F. Customer experience
@@ -58,6 +58,9 @@ The Summary section is specified now and built in Phase 3.
 ## Quality targets
 
 - Zero Verified findings resting only on merchant information, enforced by a test across all rules.
+- No income condition settled from deposits; income uncertainty preserved (range straddles and "Not sure" stay unknown).
+- No comparison leaning that the bounds do not support.
+- No private tax information visible across people without a consented shared tax unit.
 - Categorizer precision of at least 98% on tax-relevant categories, measured on fixtures that include hard negatives. Recall is reported, not targeted, because false positives are worse than misses.
 - Every tax figure traceable to an IRS source.
 - Widget passes automated accessibility checks with zero violations and the manual checklist in [accessibility](../product/opportunity-feed/accessibility.md).

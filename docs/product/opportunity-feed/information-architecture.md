@@ -13,16 +13,20 @@
 ```
 {Feature name}                           e.g. "Tax Opportunities"
 ├── Header: feature name, tax year, data-through date
+│                                  Jan 1 to Apr 15: previous year by default, switcher visible (Q8)
 ├── Section tabs: Discover | My Review | Summary (when enabled)
 │
 ├── Discover
-│   ├── Comparison card            standard deduction vs itemizing
-│   ├── Status filter              All · Needs your input · Potential · Verified
-│   ├── Opportunity feed           one card per opportunity
+│   ├── Comparison card            standard deduction vs itemizing; incomplete,
+│   │                              provisional or complete
+│   ├── Status filter              All, Needs your input, Potential, Verified
+│   ├── Opportunity feed           one card per opportunity, ordered by next action
+│   ├── Checked, doesn't apply     collapsed; ruled-out items with reasons (Q5)
 │   └── Empty / partial states
 │
 ├── Opportunity detail             reached from any card or review item
 │   ├── Amount, category, eligibility status, review status
+│   ├── What this status means     e.g. "What Verified means" (R1)
 │   ├── Why we found this          evidence, in plain language
 │   ├── What decides eligibility   conditions with their state and IRS source
 │   ├── Transactions               preview of the supporting transactions
@@ -30,7 +34,7 @@
 │
 ├── My Review
 │   ├── Progress                   items reviewed out of items to review
-│   ├── About you                  profile questions (filing status, income range)
+│   ├── About you                  filing status, AGI range, MAGI follow-ups when relevant
 │   ├── To review                  opportunities not started or in progress
 │   ├── Needs another look         outdated reviews
 │   ├── Reviewed                   saved reviews; open to revisit
@@ -53,10 +57,10 @@ The approved workflow, Discovery → Transaction Review → Eligibility Question
 
 ## Navigation rules
 
-- The widget opens on Discover unless the bank's session requests another entry point (see [open questions](open-questions.md)).
+- The widget opens on Discover. Bank entry points into a specific opportunity are deferred ([design decision](design-decisions.md) Q7).
 - Views change inside the widget without adding browser history entries, so the bank page's back button keeps working as the bank expects. The widget shows its own Back control on every view below the section level.
 - Leaving the review flow part-way keeps everything the customer did; the opportunity shows as in progress.
-- When an opportunity needs a profile answer (for example income range), the Questions step asks it in place and saves it to the profile. Customers are never sent elsewhere to answer, and never asked the same question twice.
+- When an opportunity needs a profile answer (for example AGI range), the Questions step asks it in place and saves it to the profile. Customers are never sent elsewhere to answer, and never asked the same question twice.
 - After saving a review, the customer returns to where they started the flow, with focus on the item they just reviewed.
 
 ## Layout

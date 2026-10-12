@@ -21,14 +21,16 @@ Built in `apps/widget` (React 19, Vite) as reusable components driven by design 
     │   │   │   └── <OpportunityCard> × n
     │   │   │       ├── <CategoryLabel>
     │   │   │       ├── <AmountFigure>
-    │   │   │       ├── <EligibilityBadge>
+    │   │   │       ├── <EligibilityBadge> → <StatusExplainer>
     │   │   │       ├── <ReviewStatusChip>
     │   │   │       ├── <Explanation>
     │   │   │       ├── <EvidenceLine>
     │   │   │       └── <PrimaryAction>
+    │   │   ├── <RuledOutList>       collapsed "Checked, doesn't apply"
     │   │   └── <EmptyState>
     │   ├── <OpportunityDetailView>
     │   │   ├── <DetailHeader>       category, amount, both statuses
+    │   │   ├── <StatusExplainer>    what this status means
     │   │   ├── <EvidenceList>
     │   │   ├── <ConditionList> → <ConditionItem> × n
     │   │   ├── <TransactionPreview>
@@ -48,7 +50,7 @@ Built in `apps/widget` (React 19, Vite) as reusable components driven by design 
     │   │   │   ├── <TransactionGroup> → <TransactionRow> × n
     │   │   │   ├── <RemovedTransactions>
     │   │   │   └── <RecategorizeSheet>
-    │   │   ├── <QuestionsStep> → <QuestionField> × n
+    │   │   ├── <QuestionsStep> → <QuestionField> × n   includes <IncomeRangeQuestion>
     │   │   ├── <ResultStep>
     │   │   │   ├── <StatusChange>
     │   │   │   ├── <WhatChanged>
@@ -106,11 +108,21 @@ The whole card is not a link. The category heading links to the detail view and 
 
 | Status | Icon | Label | Meaning shown on detail |
 | --- | --- | --- | --- |
-| Verified | Check in circle | Verified | Your records meet the rules we can check. This isn't a guarantee or IRS approval. |
+| Verified | Check in circle | Verified | The information we can review supports this deduction under the IRS rules we check. It isn't a guarantee that the IRS will accept it. |
 | Potential | Half-filled circle | Potential | Your activity suggests this may apply. Confirm a few details. |
 | Needs information | Question mark in circle | Needs your input | We can't tell without more information from you. |
 
 Status is always conveyed by text and icon, never color alone. Status colors are fixed by Salsa (not bank-configurable) and meet contrast requirements on the surface color.
+
+### StatusExplainer
+
+Explains what an eligibility status means, in plain language (refinement R1).
+
+- On cards: the badge has an adjacent "What's this?" control that opens a short disclosure. On the detail view, the explanation is shown in full under the status.
+- Verified text: "The information we can review supports this deduction under the IRS rules we check. It isn't a guarantee that the IRS will accept it. Information we can't see, such as accounts at other banks or the rest of your tax return, can change the result."
+- Potential text: "Your activity suggests this may apply, but some details can only come from you. Confirming them lets us check the rules fully."
+- Needs your input text: "We can't tell whether this applies without information only you have, such as your income or a document from another company."
+- Implemented as a native disclosure (button with `aria-expanded`), keyboard operable, never a hover-only tooltip.
 
 ### ReviewStatusChip
 
@@ -118,10 +130,12 @@ Visually distinct from the eligibility badge (outlined chip, muted text) so the 
 
 ### ComparisonCard and DeductionMeter
 
-- Title: "Standard deduction or itemizing?"
-- The meter shows two bars on the same scale: the standard deduction for the customer's filing status, and itemizable amounts split into Verified (solid) and Potential (patterned). Patterns, not only color, distinguish the parts.
-- One sentence of outcome: "So far, the standard deduction is larger." / "So far, itemizing may give you a larger deduction." / "These are close; your remaining activity will decide." / "Add your filing status to compare."
-- Never states a tax saving. The tax effect appears only in Summary.
+- Title: "Standard deduction or itemizing?" with an "Estimate" label and a one-line definition of itemizing on first view.
+- Shows one of the comparison states in [states](states.md#6-deduction-comparison): **incomplete**, **provisional** or **complete** (refinement R2). The state name is shown in text ("We can't recommend one yet", "Provisional", "Based on your full-year records"), not only implied.
+- **Incomplete**: no leaning is shown, the meter shows only what is known (with unknown portions drawn as an open, dashed range), and the card lists what is missing, with one action for the item that would decide it.
+- **Provisional** and **complete**: the meter shows the standard deduction range and the itemized range (Verified solid, unconfirmed patterned) on the same scale, and one sentence states the leaning and what it is based on.
+- Patterns and text, not only color, distinguish verified, unconfirmed and unknown parts.
+- Never states a tax saving or a dollar difference as a benefit. The tax effect appears only in Summary (Phase 3).
 
 ### ReviewFlow
 
@@ -135,7 +149,22 @@ Date, merchant or description, account (name and last four), amount. Controls: "
 
 ### QuestionField
 
-One question per field, with the reason it matters ("This decides whether these gifts can be deducted"). Answer types: Yes / No / Not sure, choice of options, currency amount, filing status. "Not sure" is always available and is a valid answer. Previously answered profile questions appear pre-filled with "You told us on Oct 12", editable.
+One question per field, with the reason it matters ("This decides whether these gifts can be deducted"). Answer types: Yes / No / Not sure, choice of options, currency amount, filing status, income range. "Not sure" is always available and is a valid answer. Previously answered profile questions appear pre-filled with "You told us on Oct 12", editable. Nothing is ever pre-filled from bank data.
+
+### IncomeRangeQuestion
+
+- Asks for the measure the rule uses: AGI in About you; a MAGI follow-up only for rules whose definition can differ, and only when it could change the outcome ([ADR 0009](../../decisions/0009-income-information.md)).
+- Range boundaries line up with the thresholds of the rules in scope; options are ranges, plus "Not sure".
+- Help text in plain language: what AGI is, that last year's return shows last year's figure (which may differ), and that the answer is an estimate the customer can change.
+- Never displays deposit totals, never calls deposits income, never suggests a range.
+
+### RecategorizeSheet
+
+Short, context-specific options (design decision Q15): for giving, "A purchase, not a gift"; for medical, "Not a medical cost"; always "Something else" and "Not sure". A bottom sheet dialog that traps focus while open and returns it on close.
+
+### RuledOutList
+
+Collapsed by default under the feed: "Checked, doesn't apply ({n})". Each item shows the category and the plain reason ("Your car loan is for a used vehicle; this deduction is for new vehicles"). No amounts are emphasized and there is no action other than viewing the detail.
 
 ### ResultStep
 
@@ -166,4 +195,8 @@ States the status after evaluation, what changed, and what is still open. Announ
 | Motion | 150 ms for state changes; none when reduced motion is requested |
 | Breakpoints (container) | compact < 480 px, regular 480 to 767 px, wide ≥ 768 px |
 
-Tokens become CSS custom properties on the widget root. Only the keys above exist; configuration cannot add properties.
+Tokens become CSS custom properties on the widget root. Only the keys above exist; configuration cannot add properties. Phase 2 ships the light appearance only; neutral and status tokens are defined so a dark set can be added later (design decision Q9).
+
+## Text
+
+All customer-facing text lives in a message catalog keyed by message id, with the configured feature name and bank name as parameters. Phase 2 ships English (`en-US`); other languages are a translation task (design decision Q11). Action labels come only from the catalog's approved action list.
