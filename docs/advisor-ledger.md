@@ -8,7 +8,8 @@ Bound per call = (input characters ÷ 3) × input price + maximum completion tok
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-10-12 | none | Connection test: one-sentence generic question, no project data | `venice_chat` | default (`venice-uncensored`; priced as Venice Uncensored 1.2, $0.20 / $0.90 per million) | Actual usage: 1,758 input, 35 output tokens | 0.0004 | 0.0004 |
 | 2026-10-12 | none | Connection test: same question | `venice_responses` | default | Bound: about 1,800 input tokens, 80 output tokens maximum | 0.0005 | 0.0009 |
+| 2026-10-12 | 1 | Architecture review of Phase 2 (consultation 1 of 1 authorized). The computer link timed out after 60 s with no reply; the call may have run and been billed | `venice_responses` | `deepseek-v4-pro` ($1.65 / $3.30 per million) | Bound: 6,176 characters (about 2,059 input tokens) + 32,768 output tokens maximum | 0.1115 | 0.1124 |
 
-Remaining budget (worst case): **$4.99**.
+Remaining budget (worst case): **$4.89**.
 
 The product owner can check actual spend in the Venice account's usage page; this ledger is an upper bound, not an invoice.
