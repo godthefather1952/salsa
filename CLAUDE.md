@@ -18,6 +18,8 @@ TypeScript everywhere, pnpm workspaces + Turborepo, Node 22.
 - A feature is complete only when its tests exist and pass. The sandbox must keep working in every PR.
 - Record architectural decisions in `docs/decisions` (see its README for the template and statuses).
 - Build what the specification in `docs/product/opportunity-feed` says; raise conflicts instead of improvising.
+- Second opinions (ADR 0014): consult Venice through `venice_responses` with model `deepseek-v4-pro` for architecture, complex implementation, security or significant product changes. At most two consultations per PR. Log each call in `docs/advisor-ledger.md`; stop and ask before the cumulative bound would pass $5. Send only public repo content and fictional data. Venice is advisory: verify its claims, and never treat it as approval.
+- Ask the product owner before: product scope or significant customer-facing changes, new spending or paid services, expanding security permissions or weakening safeguards, merging, deploying.
 
 ## Commands
 

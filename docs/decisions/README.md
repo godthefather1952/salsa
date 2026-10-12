@@ -7,7 +7,7 @@ Each record captures one decision: the context, the decision, and its consequenc
 - **Proposed**: recommended by engineering, awaiting the product owner's approval.
 - **Superseded**: replaced by a later record.
 
-All thirteen records were accepted by the product owner on 2026-10-12; 0003, 0008, 0009 and 0010 with refinements recorded in their text.
+All fourteen records were accepted by the product owner on 2026-10-12; 0003, 0008, 0009 and 0010 with refinements recorded in their text.
 
 | # | Decision | Status |
 | --- | --- | --- |
@@ -24,6 +24,7 @@ All thirteen records were accepted by the product owner on 2026-10-12; 0003, 000
 | [0011](0011-saved-review-snapshots.md) | Saved engine evaluations | Accepted |
 | [0012](0012-2026-rule-scope.md) | Rule scope for tax year 2026 | Accepted |
 | [0013](0013-development-workflow.md) | Development workflow | Accepted |
+| [0014](0014-second-opinion-advisor.md) | Second-opinion AI advisor (Venice) | Accepted |
 
 ## Template
 

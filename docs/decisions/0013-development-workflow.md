@@ -11,6 +11,7 @@
 - Important architectural decisions are recorded here as decision records.
 - No unnecessary paid services.
 - No AI features for novelty ([ADR 0007](0007-ai-classification-seam-only.md)).
+- Significant decisions may be reviewed by a second-opinion AI advisor under the rules in [ADR 0014](0014-second-opinion-advisor.md).
 - Existing working functionality is preserved; the sandbox must keep working in every pull request.
 
 ## Consequences
