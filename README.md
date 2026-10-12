@@ -1,6 +1,8 @@
 # salsa
 
-Salsa is a tax deduction finder and expense organizer that banks embed in their own app. Every customer gets it automatically, with no separate sign-up, because the bank already has the data salsa needs.
+Salsa is a white-label financial intelligence service that banks embed in their own online and mobile banking. Its first module, the Opportunity Feed, finds possible tax deductions in a customer's bank activity and guides them to confirm what applies. Customers see it under their bank's brand (by default as "Tax Opportunities"), with no separate sign-up, because the bank already has the data it needs.
+
+Architecture, decision records and the product specification are in [docs](docs/README.md).
 
 > **Status:** learning and portfolio project. All banks, people and transactions in this repo are fictional. Salsa's numbers are estimates, not tax advice.
 
@@ -116,8 +118,8 @@ Each generated transaction also carries a `truthCategory`, the answer key used t
 ## Roadmap
 
 - [x] **Phase 1: Scaffold.** Monorepo, CI, database schema with tenant isolation, fake data generator, API skeleton.
-- [x] **Sandbox.** Two fake banks, bank API keys, the bank-to-salsa token handshake, and a widget preview that shows loan interest from the bank's loan records. Pulled forward from phases 3 and 4 so the whole flow can be tested early.
-- [ ] **Phase 2: Tax engine.** `tax-rules` package for tax year 2026 (standard deduction, itemized categories, deductions available to everyone, phase-outs) and a rules-first categorizer measured against the persona answer keys.
-- [ ] **Phase 3: Full widget.** Itemize meter, every finding with confirm or reject, and a short filing-status question.
-- [ ] **Phase 4: Bank readiness.** Per-bank list of sites allowed to embed the widget (`frame-ancestors`), key rotation tooling, audit log, a data feed endpoint instead of the seed script.
-- [ ] **Phase 5: Polish.** Year-end PDF summary, deployment, architecture diagram and demo video.
+- [x] **Sandbox.** Two fake banks, bank API keys, the bank-to-Salsa token handshake, and a widget preview showing loan interest.
+- [ ] **Phase 2: Opportunity Feed.** Tax rules for 2026, categorizer, tax engine with Verified / Potential / Needs information findings, review workflow, bank configuration and controlled embedding, Discover and My Review. See the [Phase 2 plan](docs/architecture/phase-2-plan.md).
+- [ ] **Phase 3: Summary.** Year-at-a-glance comparison, estimated tax effect, documents to keep, document handling.
+- [ ] **Phase 4: Bank readiness.** Data feed ingestion, rate limits, API reference, retention policies, field-level encryption review, admin configuration.
+- [ ] **Phase 5: Launch polish.** Deployment, demo video, architecture diagrams.
