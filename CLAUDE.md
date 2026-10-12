@@ -6,12 +6,15 @@ Tax deduction finder that banks embed for everyday consumers. See README.md for 
 
 TypeScript everywhere, pnpm workspaces + Turborepo, Node 22.
 - `apps/api`: Fastify 5, Drizzle ORM, Postgres (PGlite locally and in tests, `pg` for real servers)
+- `apps/widget`: React 19 + Vite, the panel banks embed in an iframe (dev server proxies `/v1` to the API)
+- `apps/demo-bank`: two fictional banks' websites (Fastify, server-rendered HTML) that embed the widget
 - `packages/core`: shared domain types and helpers
 - `packages/fixtures`: deterministic fake bank data
 - Biome for lint and format, Vitest for tests
 
 ## Commands
 
+- `pnpm dev` runs API (3001), widget (5173) and demo banks (4000); `pnpm db:setup` once first
 - `pnpm check` must pass before any commit (lint, typecheck, tests)
 - `pnpm format` fixes formatting and import order
 - After changing `apps/api/src/db/schema.ts`: `pnpm db:generate --name <what_changed>` and commit the new file in `apps/api/drizzle`. CI fails if the schema and migrations disagree.
@@ -27,4 +30,6 @@ TypeScript everywhere, pnpm workspaces + Turborepo, Node 22.
 - Tax rules are per tax year, with a source link (IRS page or publication) next to every number.
 - Anything shown to customers is labeled an estimate, not tax advice.
 - Use only fictional banks, people and merchants in fixtures and demos.
+- Integration boundary: banks call `POST /v1/widget-sessions` server-side with their API key; the browser only ever gets a short-lived widget token. Never put an API key in HTML or widget code.
+- Every widget endpoint filters by both tenant and customer from the signed token.
 - Workspace packages export TypeScript source (no build step). The API build bundles them with tsup.

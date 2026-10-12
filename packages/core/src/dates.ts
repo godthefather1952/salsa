@@ -36,6 +36,11 @@ export function addMonths(value: IsoDate, months: number): IsoDate {
   return isoDate(Math.floor(index / 12), (index % 12) + 1, day);
 }
 
+/** Today's date on this machine's local calendar. */
+export function todayIso(now: Date = new Date()): IsoDate {
+  return isoDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+}
+
 /** ISO dates sort correctly as strings, so plain comparison works. */
 export function isWithin(value: IsoDate, start: IsoDate, end: IsoDate): boolean {
   return value >= start && value <= end;

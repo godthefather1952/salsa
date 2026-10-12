@@ -1,9 +1,9 @@
-import { generateAll } from '@salsa/fixtures';
+import { DEMO_BANKS, generateAll } from '@salsa/fixtures';
 import { and, count, eq, sum } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { DatabaseHandle } from '../src/db/client';
 import { accounts, customers, tenants, transactions } from '../src/db/schema';
-import { DEMO_TENANTS, type SeedCounts, seedDemoData } from '../src/db/seed';
+import { type SeedCounts, seedDemoData } from '../src/db/seed';
 import { expectConstraintViolation, memoryDatabase } from './helpers';
 
 const TAX_YEAR = 2026;
@@ -39,14 +39,14 @@ async function findCustomer(tenantSlug: string, externalRef: string) {
 
 describe('seeding', () => {
   it('creates two banks with four customers each', async () => {
-    expect(seeded.tenants).toBe(DEMO_TENANTS.length);
+    expect(seeded.tenants).toBe(DEMO_BANKS.length);
     expect(seeded.customers).toBe(8);
     expect(await rowCount(tenants)).toBe(2);
     expect(await rowCount(customers)).toBe(8);
   });
 
   it('loads every generated transaction', async () => {
-    const expected = DEMO_TENANTS.reduce(
+    const expected = DEMO_BANKS.reduce(
       (total, tenant) =>
         total +
         generateAll({ taxYear: TAX_YEAR, seed: tenant.slug }).reduce(

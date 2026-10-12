@@ -24,26 +24,37 @@ sequenceDiagram
     participant W as Salsa widget
     C->>B: Logs in (bank's own login)
     B->>BS: Open "Tax savings" tab
-    BS->>S: Request session token for customer (server to server)
-    S-->>BS: Short-lived token
-    BS-->>B: Token
-    B->>W: Load widget in an iframe with the token
-    W->>S: Fetch deductions for this customer only
+    BS->>S: POST /v1/widget-sessions with the bank's secret API key
+    S-->>BS: Token for this one customer, valid 15 minutes
+    BS-->>B: Page with salsa's iframe and the token
+    B->>W: Load widget in the iframe
+    W->>S: GET /v1/widget/me with the token
+    S-->>W: This customer's data, in this bank's colors
 ```
 
-Salsa never sees bank passwords, card numbers or Social Security numbers. Each bank is a separate tenant with its own colors and logo.
+Salsa never sees bank passwords, card numbers or Social Security numbers. The bank's API key stays on the bank's server; the browser only ever holds a short-lived token that opens one customer's data. Each bank is a separate tenant with its own colors and logo.
+
+## How testing works before a real bank
+
+Nothing is tested on a live bank. A bank gives a vendor like salsa a **sandbox**: a practice copy of its systems with fake customers. The vendor connects there, the bank's security team reviews it, employees try it, and only then does it reach real customers, usually a small group first.
+
+This repo includes its own sandbox so you can do the same thing on your laptop: two fictional banks with their own websites, sign-in and accounts, each embedding salsa exactly the way a real bank would.
+
+![Tax savings inside the fictional Tidewater Demo Bank](docs/sandbox-tax-savings.png)
 
 ## Repo layout
 
 ```
 apps/
-  api/            Fastify + Postgres (Drizzle ORM). Tenants, customers, accounts, transactions.
+  api/            Fastify + Postgres (Drizzle ORM). Banks, API keys, customers, accounts, transactions.
+  widget/         React panel (Vite) that banks embed in an iframe.
+  demo-bank/      Two fake online banks that embed the widget. Local testing only.
 packages/
   core/           Shared types and helpers: money in cents, dates, account and transaction kinds.
   fixtures/       Deterministic fake bank data: four personas with a full year of transactions.
 ```
 
-Coming in later phases: `packages/tax-rules`, `packages/categorizer`, `apps/widget`, `apps/demo-bank`.
+Coming next: `packages/tax-rules` and `packages/categorizer`.
 
 ## Quick start
 
@@ -51,10 +62,19 @@ You need Node 22 or newer and pnpm (`corepack enable` installs the right pnpm ve
 
 ```bash
 pnpm install
-pnpm db:setup        # create tables and load the demo banks and personas
-pnpm dev             # API on http://127.0.0.1:3001
-curl http://127.0.0.1:3001/health
+pnpm db:setup        # create tables and load the demo banks and personas (run once)
+pnpm dev             # starts everything
 ```
+
+Then open **http://localhost:4000**, pick a bank, sign in as a customer, and choose **Tax savings**. `pnpm dev` runs three things:
+
+| Address | What it is | In real life |
+| --- | --- | --- |
+| http://localhost:4000 | The fake banks' websites | The bank's own online banking |
+| http://localhost:5173 | The salsa widget | Hosted by salsa, shown inside the bank's page |
+| http://127.0.0.1:3001 | The salsa API | Hosted by salsa |
+
+Things to try: sign in as Maya at both banks and notice the same person gets different branding and different data. Sign in as Jordan to see car loan interest. Stop the API and reload Tax savings to see how the bank handles salsa being down.
 
 No database install is needed: by default the API runs Postgres inside Node using [PGlite](https://pglite.dev) and stores it in `apps/api/.data`. Stop `pnpm dev` before re-running `pnpm db:seed`, since PGlite allows one process at a time.
 
@@ -64,13 +84,13 @@ To use a real Postgres instead, run `docker compose up -d` and copy `apps/api/.e
 
 | Command | What it does |
 | --- | --- |
-| `pnpm dev` | Runs the API with auto-reload |
+| `pnpm dev` | Runs the API, widget and demo banks with auto-reload |
 | `pnpm check` | Lint, typecheck and test everything (run before every commit) |
 | `pnpm format` | Auto-fixes formatting and import order |
-| `pnpm build` | Builds the API into `apps/api/dist` |
+| `pnpm build` | Builds the API and the widget |
 | `pnpm db:generate` | Writes a new migration after you change `apps/api/src/db/schema.ts` |
 | `pnpm db:migrate` | Applies migrations |
-| `pnpm db:seed` | Reloads the demo data. Add `-- --through 2026-10-12` to simulate a year in progress |
+| `pnpm db:seed` | Reloads the demo data up to today. Add `-- --full-year` for the whole year |
 | `pnpm fixtures` | Prints a summary of the fake data. Add `-- --json` for everything |
 
 ## The demo personas
@@ -96,7 +116,8 @@ Each generated transaction also carries a `truthCategory`, the answer key used t
 ## Roadmap
 
 - [x] **Phase 1: Scaffold.** Monorepo, CI, database schema with tenant isolation, fake data generator, API skeleton.
+- [x] **Sandbox.** Two fake banks, bank API keys, the bank-to-salsa token handshake, and a widget preview that shows loan interest from the bank's loan records. Pulled forward from phases 3 and 4 so the whole flow can be tested early.
 - [ ] **Phase 2: Tax engine.** `tax-rules` package for tax year 2026 (standard deduction, itemized categories, deductions available to everyone, phase-outs) and a rules-first categorizer measured against the persona answer keys.
-- [ ] **Phase 3: Widget.** React dashboard with the itemize meter, findings with confirm/reject, and "estimate, not tax advice" labeling.
-- [ ] **Phase 4: Demo bank.** Token handshake, iframe embedding, and two differently branded fake banks.
+- [ ] **Phase 3: Full widget.** Itemize meter, every finding with confirm or reject, and a short filing-status question.
+- [ ] **Phase 4: Bank readiness.** Per-bank list of sites allowed to embed the widget (`frame-ancestors`), key rotation tooling, audit log, a data feed endpoint instead of the seed script.
 - [ ] **Phase 5: Polish.** Year-end PDF summary, deployment, architecture diagram and demo video.

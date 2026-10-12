@@ -54,6 +54,14 @@ export const TRANSACTION_TYPES = [
 ] as const;
 export type TransactionType = (typeof TRANSACTION_TYPES)[number];
 
+/** How the salsa widget is themed for each bank (tenant). */
+export interface TenantBranding {
+  primaryColor: string;
+  accentColor: string;
+  /** Wordmark text shown in the widget header until banks upload a logo. */
+  logoText: string;
+}
+
 /** Details the bank holds about a vehicle securing an auto loan. */
 export interface VehicleDetails {
   modelYear: number;

@@ -16,6 +16,8 @@ export async function expectConstraintViolation(query: PromiseLike<unknown>, con
   expect(message).toContain(constraint);
 }
 
+export const TEST_SECRET = 'test-secret-that-is-at-least-32-characters';
+
 /** A fresh, migrated, in-memory Postgres for each test file. */
 export async function memoryDatabase() {
   const handle = await openDatabase('pglite://memory');

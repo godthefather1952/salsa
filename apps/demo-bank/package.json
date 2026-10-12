@@ -1,0 +1,27 @@
+{
+  "name": "@salsa/demo-bank",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A fake online bank that embeds salsa the way a real bank would. Local testing only.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.1.3",
+    "@fastify/formbody": "^9.0.1",
+    "@salsa/core": "workspace:*",
+    "@salsa/fixtures": "workspace:*",
+    "fastify": "^5.12.5",
+    "tsx": "^4.23.15"
+  },
+  "devDependencies": {
+    "@salsa/api": "workspace:*",
+    "@types/node": "^22.20.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.4"
+  }
+}

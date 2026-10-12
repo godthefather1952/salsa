@@ -4,7 +4,12 @@ import { openDatabase } from './db/client';
 
 const config = loadConfig();
 const database = await openDatabase(config.DATABASE_URL);
-const app = buildApp({ db: database.db, logLevel: config.LOG_LEVEL });
+const app = buildApp({
+  db: database.db,
+  sessionSecret: config.SESSION_SECRET,
+  tokenTtlSeconds: config.WIDGET_TOKEN_TTL_SECONDS,
+  logLevel: config.LOG_LEVEL,
+});
 
 async function shutdown(signal: string) {
   app.log.info({ signal }, 'shutting down');

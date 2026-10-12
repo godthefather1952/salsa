@@ -10,7 +10,19 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "passThroughEnv": ["DATABASE_URL", "HOST", "PORT", "LOG_LEVEL", "NODE_ENV"]
+      "passThroughEnv": [
+        "DATABASE_URL",
+        "HOST",
+        "PORT",
+        "LOG_LEVEL",
+        "NODE_ENV",
+        "SESSION_SECRET",
+        "WIDGET_TOKEN_TTL_SECONDS",
+        "SALSA_API_URL",
+        "SALSA_WIDGET_URL",
+        "DEMO_BANK_PORT",
+        "DEMO_BANK_HOST"
+      ]
     }
   }
 }

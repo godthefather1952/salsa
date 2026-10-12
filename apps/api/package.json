@@ -4,6 +4,11 @@
   "private": true,
   "description": "Salsa API: tenants (banks), customers, accounts, transactions, and later deductions",
   "type": "module",
+  "exports": {
+    "./app": "./src/app.ts",
+    "./db": "./src/db/client.ts",
+    "./seed": "./src/db/seed.ts"
+  },
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsup",

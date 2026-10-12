@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app';
-import { memoryDatabase } from './helpers';
+import { memoryDatabase, TEST_SECRET } from './helpers';
 
 describe('GET /health', () => {
   it('reports ok when the database answers', async () => {
     const handle = await memoryDatabase();
-    const app = buildApp({ db: handle.db, logLevel: 'silent' });
+    const app = buildApp({ db: handle.db, sessionSecret: TEST_SECRET, logLevel: 'silent' });
 
     const response = await app.inject({ method: 'GET', url: '/health' });
 
@@ -18,7 +18,7 @@ describe('GET /health', () => {
   it('returns 503 when the database is unreachable', async () => {
     const handle = await memoryDatabase();
     await handle.close();
-    const app = buildApp({ db: handle.db, logLevel: 'silent' });
+    const app = buildApp({ db: handle.db, sessionSecret: TEST_SECRET, logLevel: 'silent' });
 
     const response = await app.inject({ method: 'GET', url: '/health' });
 

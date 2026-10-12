@@ -1,21 +1,8 @@
-import { generateAll } from '@salsa/fixtures';
+import { DEMO_BANKS, generateAll } from '@salsa/fixtures';
 import { inArray } from 'drizzle-orm';
+import { apiKeyPrefix, hashApiKey } from '../auth/api-keys';
 import type { Database } from './client';
-import { accounts, customers, type TenantBranding, tenants, transactions } from './schema';
-
-/** Two fictional banks, so the demo can show the same widget in two brands. */
-export const DEMO_TENANTS = [
-  {
-    slug: 'tidewater',
-    name: 'Tidewater Demo Bank',
-    branding: { primaryColor: '#0B6E6E', accentColor: '#F2A541', logoText: 'Tidewater' },
-  },
-  {
-    slug: 'summit',
-    name: 'Summit Demo Credit Union',
-    branding: { primaryColor: '#3D2C8D', accentColor: '#2EC4B6', logoText: 'Summit CU' },
-  },
-] as const satisfies ReadonlyArray<{ slug: string; name: string; branding: TenantBranding }>;
+import { accounts, customers, tenantApiKeys, tenants, transactions } from './schema';
 
 export interface SeedOptions {
   taxYear: number;
@@ -43,23 +30,30 @@ function required<T>(value: T | undefined, what: string): T {
  */
 export async function seedDemoData(db: Database, options: SeedOptions): Promise<SeedCounts> {
   return db.transaction(async (tx) => {
-    // Deleting a tenant cascades to its customers, accounts and transactions.
+    // Deleting a tenant cascades to its keys, customers, accounts and transactions.
     await tx.delete(tenants).where(
       inArray(
         tenants.slug,
-        DEMO_TENANTS.map((tenant) => tenant.slug),
+        DEMO_BANKS.map((bank) => bank.slug),
       ),
     );
 
     const counts: SeedCounts = { tenants: 0, customers: 0, accounts: 0, transactions: 0 };
 
-    for (const demo of DEMO_TENANTS) {
+    for (const demo of DEMO_BANKS) {
       const [tenant] = await tx
         .insert(tenants)
         .values({ slug: demo.slug, name: demo.name, branding: demo.branding })
         .returning({ id: tenants.id });
       const tenantId = required(tenant, 'tenant').id;
       counts.tenants++;
+
+      await tx.insert(tenantApiKeys).values({
+        tenantId,
+        label: 'Local demo key',
+        prefix: apiKeyPrefix(demo.apiKey),
+        keyHash: hashApiKey(demo.apiKey),
+      });
 
       // Same personas at every bank, with different random details per bank.
       const people = generateAll({

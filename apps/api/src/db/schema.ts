@@ -1,4 +1,10 @@
-import { ACCOUNT_KINDS, FILING_STATUSES, type LoanDetails, TRANSACTION_TYPES } from '@salsa/core';
+import {
+  ACCOUNT_KINDS,
+  FILING_STATUSES,
+  type LoanDetails,
+  type TenantBranding,
+  TRANSACTION_TYPES,
+} from '@salsa/core';
 import {
   bigint,
   char,
@@ -28,13 +34,6 @@ export const filingStatus = pgEnum('filing_status', FILING_STATUSES);
 export const accountKind = pgEnum('account_kind', ACCOUNT_KINDS);
 export const transactionType = pgEnum('transaction_type', TRANSACTION_TYPES);
 
-export interface TenantBranding {
-  primaryColor: string;
-  accentColor: string;
-  /** Wordmark text shown in the widget header until banks upload a logo. */
-  logoText: string;
-}
-
 const createdAt = () => timestamp('created_at', { withTimezone: true }).notNull().defaultNow();
 
 export const tenants = pgTable('tenants', {
@@ -43,6 +42,24 @@ export const tenants = pgTable('tenants', {
   name: text('name').notNull(),
   branding: jsonb('branding').$type<TenantBranding>().notNull(),
   createdAt: createdAt(),
+});
+
+/**
+ * Keys a bank's servers use to call salsa. Only a SHA-256 hash is stored, so a
+ * database leak does not leak working keys. A bank can hold several keys at
+ * once, which lets it rotate: add a new key, deploy, then revoke the old one.
+ */
+export const tenantApiKeys = pgTable('tenant_api_keys', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id')
+    .notNull()
+    .references(() => tenants.id, { onDelete: 'cascade' }),
+  label: text('label').notNull(),
+  /** The first few characters, safe to show in an admin screen ("sk_test_tide…"). */
+  prefix: text('prefix').notNull(),
+  keyHash: char('key_hash', { length: 64 }).notNull().unique(),
+  createdAt: createdAt(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
 });
 
 export const customers = pgTable(
