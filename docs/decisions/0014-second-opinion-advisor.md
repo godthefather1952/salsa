@@ -47,4 +47,5 @@ The product owner wants an independent reviewer for significant decisions, separ
   - The computer link waits at most 60 seconds per call.
   - For `deepseek-v4-pro`, reasoning counts toward `max_output_tokens`. At a 1,000-token cap the reply ran out during reasoning, and only a partial reasoning summary came back.
   - Future consultations use a brief of about 2,500 characters, ask for at most 150 words, and set `max_output_tokens` to 2,500. If a call still fails, it is not retried without approval.
+  - The computer link cuts a tool result at about 8,200 characters. `deepseek-v4-pro` returns its reasoning summary before its answer, so a long reasoning summary can push the answer past the cut (PR 2 plan review). A way around this needs the product owner's approval before the next consultation.
 - Reviews depend on the product owner's computer being linked to the session. When it is not, work continues without a second opinion, and the pull request says so.
