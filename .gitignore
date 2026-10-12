@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+.turbo/
+*.log
+
+# Local environment and the zero-setup PGlite database
+.env
+.env.*
+!.env.example
+.data/
+
+.DS_Store

@@ -1,0 +1,22 @@
+# Optional: a real Postgres for local development.
+#   docker compose up -d
+#   then set DATABASE_URL=postgres://salsa:salsa@localhost:5432/salsa in apps/api/.env
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: salsa
+      POSTGRES_PASSWORD: salsa
+      POSTGRES_DB: salsa
+    ports:
+      - '5432:5432'
+    volumes:
+      - salsa-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U salsa']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  salsa-postgres:

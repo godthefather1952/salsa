@@ -1,0 +1,24 @@
+{
+  "name": "@salsa/fixtures",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Deterministic fake bank data: personas with a year of realistic transactions",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "summary": "tsx src/summary.ts"
+  },
+  "dependencies": {
+    "@salsa/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.4"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "@salsa/api",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Salsa API: tenants (banks), customers, accounts, transactions, and later deductions",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsup",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/db/migrate-cli.ts",
+    "db:seed": "tsx src/db/seed-cli.ts"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.9",
+    "@salsa/core": "workspace:*",
+    "drizzle-orm": "^0.45.4",
+    "fastify": "^5.12.5",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@salsa/fixtures": "workspace:*",
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
+    "tsup": "^8.5.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.4"
+  }
+}

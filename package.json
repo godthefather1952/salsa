@@ -1,0 +1,29 @@
+{
+  "name": "salsa",
+  "private": true,
+  "description": "Tax deduction finder and expense organizer that banks embed for their customers",
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "db:generate": "pnpm --filter @salsa/api db:generate",
+    "db:migrate": "pnpm --filter @salsa/api db:migrate",
+    "db:seed": "pnpm --filter @salsa/api db:seed",
+    "db:setup": "pnpm db:migrate && pnpm db:seed",
+    "fixtures": "pnpm --filter @salsa/fixtures summary"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "turbo": "^2.11.7",
+    "typescript": "^7.0.2"
+  }
+}
