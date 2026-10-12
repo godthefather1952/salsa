@@ -15,14 +15,20 @@ Every widget request is authorized in four layers, in this order ([ADR 0010](../
 
 Ownership, visibility and tax unit access are separate permissions. Marriage, a "married filing jointly" answer or joint account ownership never by itself grants access to another person's private tax information.
 
-Tests for every endpoint include a cross-tenant attempt, a cross-person attempt on a joint account, and a revoked-grant attempt, all of which must fail.
+All four layers are enforced by one authorization module, never re-implemented per endpoint:
+
+- Every route declares its policy when it is registered. The server refuses to start if a route has none (deny by default).
+- Route handlers read data only through the tenant-scoped data-access layer, which requires the verified tenant and party. Row-level security in the database is proposed as a further layer from PR 4 ([ADR 0015](../../decisions/0015-database-enforced-tenant-isolation.md)).
+- A permission matrix test runs every endpoint against every combination of other tenant, other person on a joint account, revoked visibility grant, and non-member of a shared tax unit. Every combination must fail.
 
 ## Authenticated sessions
 
 - The bank authenticates the customer. Salsa never handles bank credentials.
 - The bank's server requests a widget session with its API key (hashed at rest, revocable, several active keys for rotation).
-- Widget tokens last 15 minutes, live only in memory in the widget (never in local storage or cookies), and are refreshed through the host before expiry.
-- Every answer, transaction decision and dismissal is recorded with the person and session that made it.
+- Each widget session is a server-side record (`widget_sessions`: tenant, party, created, expires, revoked). The token carries `{tenantId, partyId, sessionId, exp}`. Every request checks that the session exists and is not revoked, so a session can be ended before its token expires.
+- Widget tokens last 15 minutes, live only in memory in the widget (never in local storage or cookies), and are refreshed through the host before expiry. A refresh creates a new session record linked to the previous one.
+- Every answer, transaction decision and dismissal is recorded with the person and the session id that made it.
+- A bank-facing endpoint to revoke a customer's sessions comes in Phase 4.
 
 ## Controlled embedding
 
@@ -47,6 +53,7 @@ Bank configuration can never introduce scripts, HTML, stylesheets or remote reso
 - Application logs never include transaction descriptions, amounts tied to customers, or answers. The audit table holds those, with restricted access.
 - No analytics or tracking in Phase 2.
 - Retention periods for evaluations, answers and audit events are agreed per bank before production (Phase 4).
+- Any environment holding real customer data uses database storage encrypted at rest. Field-level encryption with per-tenant keys for the most sensitive columns (customer answers, income ranges, medical-related classifications) is evaluated in Phase 4; it needs a key management service, which is a new cost requiring approval. Salsa never stores Social Security numbers.
 
 ## Host integration contract (for bank engineers)
 

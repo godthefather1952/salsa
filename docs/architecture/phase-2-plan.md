@@ -21,7 +21,7 @@ Goal: a working Opportunity Feed in the sandbox. Customers of both fictional ban
 | PR | Delivers | Done when |
 | --- | --- | --- |
 | 3 | `packages/tax-rules`: federal individual rules for 2026 with IRS sources, including each rule's income measure (AGI or that provision's MAGI) | Every figure and income-measure definition has a source link and a test |
-| 4 | Bank data model: parties, account holders (ownership), visibility grants, tax units and members (consent and scopes), lender tax records, pending/posted and reversals, customer facts owned by a party; fixtures gain lender records, hard negative cases, and Daniel Brooks (Maya's spouse, joint checking owner, separate customer) | Migrations apply; sandbox still works; fixtures cover the cases listed below; permission model tests pass |
+| 4 | Bank data model: parties, account holders (ownership), visibility grants, tax units and members (consent and scopes), lender tax records, pending/posted and reversals, customer facts owned by a party; fixtures gain lender records, hard negative cases, and Daniel Brooks (Maya's spouse, joint checking owner, separate customer). Customers become parties (existing ids preserved); row-level security policies and a non-owner API role if [ADR 0015](../decisions/0015-database-enforced-tenant-isolation.md) is accepted | Migrations apply; sandbox still works; fixtures cover the cases listed below; permission model tests pass |
 
 Hard negative fixture cases: purchase at a charity-run thrift store, raffle ticket, refunded donation, county vehicle registration fee, snacks bought at a pharmacy, doctor visit paid from an HSA, church bookstore purchase.
 
@@ -38,7 +38,7 @@ Hard negative fixture cases: purchase at a charity-run thrift store, raffle tick
 ### E. Integration and platform
 | PR | Delivers | Done when |
 | --- | --- | --- |
-| 7 | Review API: saved evaluations, findings, transaction decisions, answers, reviews, audit events, explicit tax year; four-layer authorization (tenant, party, visibility, tax unit scope) | Every endpoint is tested for cross-tenant, cross-person (joint account) and revoked-grant access |
+| 7 | Review API: saved evaluations, findings, transaction decisions, answers, reviews, audit events, explicit tax year; four-layer authorization (tenant, party, visibility, tax unit scope) through one authorization module (deny by default, policy declared per route) and a tenant-scoped data-access layer. Server-side widget sessions; token claims become `{tenantId, partyId, sessionId, exp}` | Every endpoint is tested for cross-tenant, cross-person (joint account) and revoked-grant access |
 | 8 | Experience configuration and controlled embedding: versioned config, validation, per-tenant `frame-ancestors`, origin-restricted messaging, session refresh, self-hosted fonts | Unsafe configs are rejected; unregistered origins cannot embed |
 
 ### F. Customer experience
@@ -61,6 +61,7 @@ The Summary section is specified now and built in Phase 3.
 - No income condition settled from deposits; income uncertainty preserved (range straddles and "Not sure" stay unknown).
 - No comparison leaning that the bounds do not support.
 - No private tax information visible across people without a consented shared tax unit.
+- The permission matrix test passes for every endpoint; no route registers without a policy.
 - Categorizer precision of at least 98% on tax-relevant categories, measured on fixtures that include hard negatives. Recall is reported, not targeted, because false positives are worse than misses.
 - Every tax figure traceable to an IRS source.
 - Widget passes automated accessibility checks with zero violations and the manual checklist in [accessibility](../product/opportunity-feed/accessibility.md).

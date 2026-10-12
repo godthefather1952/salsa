@@ -10,7 +10,7 @@ Salsa is a white-label financial intelligence service that banks embed in their 
 
 ## Decisions
 
-[Architecture decision records](decisions/README.md). Each records one decision, its context and its consequences. All fourteen current records are **Accepted**.
+[Architecture decision records](decisions/README.md). Each records one decision, its context and its consequences. Records 0001 to 0014 are **Accepted**; 0015 is **Proposed**.
 
 The [advisor ledger](advisor-ledger.md) records every second-opinion consultation and its cost bound.
 

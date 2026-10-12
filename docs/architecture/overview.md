@@ -84,3 +84,6 @@ packages/core          shared types: money, dates, accounts, API contracts
 | 9 | Tax year is always the current calendar year | January to April, customers need last year | Phase 2, PR 7 |
 | 10 | No audit trail of customer answers or corrections | Cannot reconstruct who changed what | Phase 2, PR 7 |
 | 11 | No rate limiting, no API reference for bank engineers | Abuse, slow integrations | Phase 4 |
+| 12 | Tenant isolation depends on every query remembering its filter | One missed filter leaks another bank's data | Phase 2: one data-access layer (PR 7); row-level security proposed for PR 4 ([ADR 0015](../decisions/0015-database-enforced-tenant-isolation.md)) |
+| 13 | Widget tokens cannot be revoked before expiry and carry no session id | A leaked token works for up to 15 minutes; audit records cannot name the session | Phase 2, PR 7: server-side widget sessions |
+| 14 | No encryption beyond what the database host provides | Sensitive financial data exposed if storage is compromised | Encryption at rest required before real data; field-level encryption evaluated in Phase 4 |

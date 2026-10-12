@@ -43,4 +43,8 @@ The product owner wants an independent reviewer for significant decisions, separ
 ## Consequences
 
 - Consultations add a small, bounded cost: roughly $0.11 worst case per call at current prices, and far less in practice.
+- Observed on 2026-10-12:
+  - The computer link waits at most 60 seconds per call.
+  - For `deepseek-v4-pro`, reasoning counts toward `max_output_tokens`. At a 1,000-token cap the reply ran out during reasoning, and only a partial reasoning summary came back.
+  - Future consultations use a brief of about 2,500 characters, ask for at most 150 words, and set `max_output_tokens` to 2,500. If a call still fails, it is not retried without approval.
 - Reviews depend on the product owner's computer being linked to the session. When it is not, work continues without a second opinion, and the pull request says so.

@@ -126,7 +126,7 @@ interface CustomerAnswer {
   value: AnswerValue | 'unsure';
   taxYear: number;
   answeredAt: string;
-  sessionId: string;                 // audit: which widget session
+  sessionId: string;                 // audit: which widget session (a widget_sessions row; also in the token)
   supersedes: string | null;         // previous answer id; history is kept
 }
 ```
@@ -181,7 +181,8 @@ interface DeductionComparison {
   itemizedRange: [number, number | null];       // [verified only, verified + max of unconfirmed]; null = unbounded
   state:
     | { kind: 'incomplete'; reason: 'needs_filing_status' | 'too_early' | 'depends_on_open_items'
-                                  | 'year_in_progress' | 'too_close'; decidingRequests: string[] }
+                                  | 'year_in_progress' | 'too_close' | 'spouse_not_included'
+                                  | 'spouse_itemizing_unknown'; decidingRequests: string[] }
     | { kind: 'provisional'; leaning: 'itemize' }
     | { kind: 'complete'; leaning: 'standard' | 'itemize' };
   basis: { dataThrough: string; lenderFormsReceived: boolean };
@@ -211,5 +212,6 @@ The comparison leans only when the leaning holds across both ranges ([states](..
 | `findings` | Findings belonging to an evaluation | 7 |
 | `transaction_decisions` | Each person's exclusions and recategorizations, versioned | 7 |
 | `opportunity_reviews` | Each person's sign-offs and dismissals | 7 |
+| `widget_sessions` | Server-side session records: tenant, party, expiry, revocation, previous session on refresh | 7 |
 | `audit_events` | Who changed what, from which session | 7 |
 | `tenant_experience_configs` | Versioned bank configuration ([configuration](../product/opportunity-feed/configuration.md)) | 8 |

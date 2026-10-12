@@ -11,7 +11,7 @@ Amounts are illustrative, from the sandbox personas part-way through 2026.
    - **Charitable giving**, $1,738.00 given so far in 2026, Potential, "Based on 12 payments to 2 organizations", action "Review 12 payments".
    - **Mortgage interest**, $23,366.25 interest paid, Verified, "From your mortgage records at Tidewater Demo Bank", action "Review details".
    - **Property tax**, $3,700.00 paid, Potential, "Based on 1 bill payment to County Tax Commissioner", action "Confirm 1 payment".
-5. She adds "Married filing jointly". The card stays **incomplete**, now for a different reason: "It's too early to tell. So far, your itemizable amounts are below the standard deduction, and the rest of the year can change that." It shows her verified and unconfirmed amounts against the standard deduction, but no recommendation, because more mortgage interest, property tax and gifts are still to come this year.
+5. She adds "Married filing jointly". The card stays **incomplete**, now for a different reason: "We can't compare for a joint return yet. Your spouse's deductible expenses aren't included." It shows her verified and unconfirmed amounts against the standard deduction, without a recommendation. Her spouse's information stays separate unless both of them choose to share (J9), and the rest of the year can still change her own totals.
 6. Nothing is labeled savings. The tax effect appears only later, in Summary, once she has answered the profile questions.
 7. She taps "What's this?" next to Verified on Mortgage interest and reads that Verified means the information Salsa can review supports the deduction, not that the IRS will accept it.
 

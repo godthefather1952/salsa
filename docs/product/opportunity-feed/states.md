@@ -89,6 +89,8 @@ The comparison never recommends more than the information supports. It works wit
 - **Itemized lower bound**: deductible amounts of Verified itemized findings only.
 - **Itemized upper bound**: the lower bound plus the largest possible deductible amount of every Potential and Needs-your-input itemized finding. A finding with no upper limit makes the upper bound unknown.
 - Dismissed and ruled-out findings are excluded. The margin is 10% of the standard deduction.
+- For married filing jointly in an individual tax unit, the itemized upper bound is open, because the spouse's expenses are unknown. Salsa never shows "the standard deduction looks larger" for a joint return it cannot fully see.
+- For married filing separately, the standard deduction range is [0, standard amount] until the person answers whether their spouse itemizes. The answer is private to them, like every other answer.
 
 | State | Condition | Sentence | Action |
 | --- | --- | --- | --- |
@@ -97,9 +99,13 @@ The comparison never recommends more than the information supports. It works wit
 | `incomplete` (`depends_on_open_items`) | The itemized bounds straddle the standard deduction range because of unconfirmed items | We can't recommend one yet. It depends on {n} items you haven't confirmed. | Review {first deciding item} |
 | `incomplete` (`year_in_progress`) | The year is still in progress and the itemized lower bound has not passed the standard deduction range. Later activity could still change the answer, so no leaning toward the standard deduction is shown before the year ends | It's too early to tell. So far, your itemizable amounts are below the standard deduction, and the rest of the year can change that. | None |
 | `incomplete` (`too_close`) | No open items, but the totals are within the margin | These are too close to call with the information we have. | None |
+| `incomplete` (`spouse_not_included`) | Filing status is married filing jointly and the person's tax unit is individual, so the spouse's deductible expenses are not included and the itemized upper bound is open. Only a leaning toward itemizing (lower bound) can still be shown | We can't compare for a joint return yet. Your spouse's deductible expenses aren't included. | None in Phase 2 |
+| `incomplete` (`spouse_itemizing_unknown`) | Filing status is married filing separately and the person has not said whether their spouse itemizes. If the spouse itemizes, the standard deduction is not available ([IRS Topic 501](https://www.irs.gov/taxtopics/tc501)) | We need to know whether your spouse itemizes before we can compare. | Answer 1 question |
 | `provisional` (`itemize`) | Year in progress, and the itemized lower bound (Verified only) already exceeds the top of the standard deduction range by more than the margin | Based on what we've verified so far, itemizing looks larger. This can change if any of these items change. | View details |
 | `complete` (`standard`) | Tax year closed, lender tax forms received, and the itemized upper bound is below the bottom of the standard deduction range by more than the margin | Based on your full-year records at {bank} and your answers, the standard deduction looks larger. Deductible expenses paid from other banks could change this. | View details |
 | `complete` (`itemize`) | Tax year closed, lender tax forms received, and the itemized lower bound exceeds the top of the standard deduction range by more than the margin | Based on your full-year records at {bank} and your answers, itemizing looks larger. | View details |
+
+When several incomplete reasons apply, the first in this order is shown: `needs_filing_status`, `spouse_itemizing_unknown`, `too_early`, `spouse_not_included`, `year_in_progress`, `depends_on_open_items`, `too_close`. `spouse_not_included` never blocks a provisional or complete leaning toward itemizing, because the spouse's expenses can only add to the itemized total.
 
 Every state carries the label "Estimate" and shows which items it is based on. No state names a tax saving or a dollar difference as savings.
 

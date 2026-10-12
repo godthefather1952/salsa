@@ -43,6 +43,7 @@ Unchanged by the refinements (R5): bank-first branding and a subtle "Powered by 
 - **K3** A leaning is shown only when it holds across the whole standard deduction range and the whole itemized range (property-based test with random unconfirmed items).
 - **K4** Every incomplete state names what is missing and, where one exists, offers the item that would decide it.
 - **K5** Every state is labeled "Estimate" and never presents the difference between totals as a saving.
+- **K6** A married-filing-jointly person in an individual tax unit never sees a standard-deduction leaning; a married-filing-separately person sees no comparison leaning until they answer whether their spouse itemizes.
 
 ## Income (PR 3, PR 6, refinement R3)
 
@@ -83,6 +84,7 @@ Unchanged by the refinements (R5): bank-first branding and a subtle "Powered by 
 - **S3** The widget sends and accepts messages only for registered origins.
 - **S4** The widget makes no requests to third-party hosts.
 - **S5** Tokens are never written to storage, logs or URLs other than the initial fragment.
+- **S6** Every token names a server-side widget session; a revoked or unknown session is rejected even before the token expires, and every audit event records the session id.
 
 ## Ownership, visibility and tax units (PR 4, PR 7, refinement R4)
 
@@ -92,6 +94,8 @@ Unchanged by the refinements (R5): bank-first branding and a subtle "Powered by 
 - **P4** Sharing starts only after the invited person's own recorded acceptance, covers only the scopes each member chose, and stops the moment either leaves (model tests in Phase 2; interface in Phase 3).
 - **P5** Revoking a visibility grant removes the account from that person's views and its evidence from their next evaluation, and marks affected reviews outdated.
 - **P6** Every endpoint applies the authorization order: tenant, party, account visibility, tax unit scope.
+- **P7** All authorization goes through one module: the server refuses to start if a route has no declared policy, and route handlers read data only through the tenant-scoped data-access layer.
+- **P8** A permission matrix test covers every endpoint against other tenant, other person on a joint account, revoked visibility grant, and non-member of a shared tax unit; every combination fails.
 
 ## Accessibility (PR 9 to PR 11)
 
