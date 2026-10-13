@@ -242,8 +242,17 @@ export function taxPage(
           const frame = document.querySelector('.salsa-frame');
           window.addEventListener('message', (event) => {
             if (event.origin !== frame.dataset.origin || event.source !== frame.contentWindow) return;
-            if (event.data?.type === 'salsa:resize') frame.style.height = event.data.height + 'px';
-            if (event.data?.type === 'salsa:reload') window.location.reload();
+            const data = event.data;
+            if (!data || typeof data !== 'object' || Array.isArray(data)) return;
+            if (data.type === 'salsa:resize') {
+              // Never interpolate an unvalidated message into CSS.
+              // Keep a bounded height to prevent layout abuse from a compromised iframe.
+              if (typeof data.height !== 'number' || !Number.isFinite(data.height)) return;
+              if (!Number.isInteger(data.height) || data.height < 100 || data.height > 10000) return;
+              frame.style.height = data.height + 'px';
+            } else if (data.type === 'salsa:reload') {
+              window.location.reload();
+            }
           });
         </script>`
     : html`
