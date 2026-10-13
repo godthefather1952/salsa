@@ -3,6 +3,7 @@
  * together over HTTP exactly as `pnpm dev` runs them.
  */
 import type { AddressInfo } from 'node:net';
+import { runInNewContext } from 'node:vm';
 import { buildApp } from '@salsa/api/app';
 import { type DatabaseHandle, openDatabase } from '@salsa/api/db';
 import { seedDemoData } from '@salsa/api/seed';
@@ -122,6 +123,47 @@ describe('the salsa integration', () => {
     expect(body.bank.name).toBe('Tidewater Demo Bank');
     expect(body.customer.displayName).toBe('Maya Brooks');
     expect(body.loanInterest[0]?.kind).toBe('mortgage');
+  });
+
+  it('accepts only bounded widget resize messages from the trusted iframe', async () => {
+    const response = await bank.inject({ url: '/tidewater/tax', cookies: await signIn('maya') });
+    const script = response.body.match(/<script>([\\s\\S]*?)<\\/script>/)?.[1];
+    expect(script).toBeTruthy();
+
+    const contentWindow = {};
+    const frame = {
+      dataset: { origin: new URL(WIDGET_URL).origin },
+      contentWindow,
+      style: { height: '300px' },
+    };
+    let onMessage: (event: { origin: string; source: unknown; data: unknown }) => void = () => {};
+    let reloads = 0;
+    runInNewContext(script ?? '', {
+      document: { querySelector: () => frame },
+      window: {
+        addEventListener: (_type: string, handler: typeof onMessage) => { onMessage = handler; },
+        location: { reload: () => { reloads++; } },
+      },
+    });
+
+    const send = (data: unknown, origin = frame.dataset.origin, source: unknown = contentWindow) =>
+      onMessage({ data, origin, source });
+
+    send({ type: 'salsa:resize', height: 450 }, 'https://attacker.example');
+    send({ type: 'salsa:resize', height: 450 }, frame.dataset.origin, {});
+    send({ type: 'salsa:resize', height: '999999px' });
+    send({ type: 'salsa:resize', height: Number.POSITIVE_INFINITY });
+    send({ type: 'salsa:resize', height: 10001 });
+    send({ type: 'salsa:resize', height: 1 });
+    send(null);
+    expect(frame.style.height).toBe('300px');
+    send({ type: 'salsa:resize', height: 450 });
+    expect(frame.style.height).toBe('450px');
+
+    send({ type: 'salsa:reload' }, 'https://attacker.example');
+    expect(reloads).toBe(0);
+    send({ type: 'salsa:reload' });
+    expect(reloads).toBe(1);
   });
 
   it("never puts the bank's API key in the page", async () => {
