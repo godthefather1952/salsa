@@ -3,13 +3,14 @@
  * together over HTTP exactly as `pnpm dev` runs them.
  */
 import type { AddressInfo } from 'node:net';
+import { runInNewContext } from 'node:vm';
 import { buildApp } from '@salsa/api/app';
 import { type DatabaseHandle, openDatabase } from '@salsa/api/db';
 import { seedDemoData } from '@salsa/api/seed';
 import type { WidgetMeResponse } from '@salsa/core';
 import { DEMO_BANKS } from '@salsa/fixtures';
 import type { FastifyInstance } from 'fastify';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { buildBankApp } from '../src/app';
 import { customersOf } from '../src/core-banking';
 import { escapeHtml, html } from '../src/html';
@@ -122,6 +123,132 @@ describe('the salsa integration', () => {
     expect(body.bank.name).toBe('Tidewater Demo Bank');
     expect(body.customer.displayName).toBe('Maya Brooks');
     expect(body.loanInterest[0]?.kind).toBe('mortgage');
+  });
+
+  describe('widget-to-bank messages', () => {
+    // Execute the script served by the real bank route. The DOM and message delivery
+    // are mocked; this checks the host contract, not browser postMessage routing.
+    async function loadHost() {
+      const response = await bank.inject({ url: '/tidewater/tax', cookies: await signIn('maya') });
+      expect(response.statusCode).toBe(200);
+      const iframe = response.body.match(/<iframe\b[^>]*>/)?.[0] ?? '';
+      expect(iframe).toContain('class="salsa-frame"');
+      const origin = iframe.match(/data-origin="([^"]+)"/)?.[1];
+      expect(origin).toBe(new URL(WIDGET_URL).origin);
+      const src = iframe.match(/src="([^"]+)"/)?.[1] ?? '';
+      expect(new URL(src).origin).toBe(origin);
+      const script = response.body.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+      expect(script).toBeTruthy();
+
+      const contentWindow = {};
+      const frame = {
+        dataset: { origin },
+        contentWindow,
+        style: { height: '300px' },
+      };
+      type HostEvent = { origin: string; source: unknown; data: unknown };
+      const querySelector = vi.fn(() => frame);
+      const addEventListener = vi.fn<(type: string, handler: (event: HostEvent) => void) => void>();
+      const reload = vi.fn();
+      runInNewContext(script ?? '', {
+        document: { querySelector },
+        window: { addEventListener, location: { reload } },
+      });
+      expect(querySelector).toHaveBeenCalledExactlyOnceWith('.salsa-frame');
+      expect(addEventListener).toHaveBeenCalledExactlyOnceWith('message', expect.any(Function));
+      const onMessage = addEventListener.mock.calls[0]?.[1];
+      if (!onMessage || !origin) throw new Error('Widget host did not initialize');
+      expect(frame.style.height).toBe('300px');
+      expect(reload).not.toHaveBeenCalled();
+
+      return {
+        frame,
+        reload,
+        origin,
+        contentWindow,
+        send: (data: unknown, eventOrigin = origin, source: unknown = contentWindow) =>
+          onMessage({ data, origin: eventOrigin, source }),
+      };
+    }
+
+    it.each([100, 450, 10000])('accepts a trusted integer height of %i', async (height) => {
+      const host = await loadHost();
+      host.send({ type: 'salsa:resize', height });
+      expect(host.frame.style.height).toBe(`${height}px`);
+      expect(host.reload).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['below minimum', 99],
+      ['above maximum', 10001],
+      ['zero', 0],
+      ['negative', -1],
+      ['fractional', 450.5],
+      ['NaN', Number.NaN],
+      ['positive infinity', Number.POSITIVE_INFINITY],
+      ['negative infinity', Number.NEGATIVE_INFINITY],
+      ['numeric string', '450'],
+      ['CSS string', '999999px'],
+      ['undefined', undefined],
+      ['null', null],
+      ['boolean', true],
+      ['object', {}],
+      ['array', [450]],
+    ])('ignores a trusted resize with %s height', async (_label, height) => {
+      const host = await loadHost();
+      host.send({ type: 'salsa:resize', height });
+      expect(host.frame.style.height).toBe('300px');
+      expect(host.reload).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['null', null],
+      ['undefined', undefined],
+      ['string', 'salsa:reload'],
+      ['number', 450],
+      ['boolean', true],
+      ['array', []],
+      ['array with resize fields', Object.assign([], { type: 'salsa:resize', height: 450 })],
+      ['array with reload fields', Object.assign([], { type: 'salsa:reload' })],
+      ['missing type', { height: 450 }],
+      ['unknown type', { type: 'salsa:unknown', height: 450 }],
+      ['missing height', { type: 'salsa:resize' }],
+    ])('ignores a malformed trusted message: %s', async (_label, data) => {
+      const host = await loadHost();
+      host.send(data);
+      expect(host.frame.style.height).toBe('300px');
+      expect(host.reload).not.toHaveBeenCalled();
+    });
+
+    describe.each(['salsa:resize', 'salsa:reload'])('%s trust boundary', (type) => {
+      it('rejects the expected iframe with a wrong origin', async () => {
+        const host = await loadHost();
+        host.send({ type, height: 450 }, 'https://attacker.example', host.contentWindow);
+        expect(host.frame.style.height).toBe('300px');
+        expect(host.reload).not.toHaveBeenCalled();
+      });
+
+      it('rejects another window at the expected origin', async () => {
+        const host = await loadHost();
+        host.send({ type, height: 450 }, host.origin, {});
+        expect(host.frame.style.height).toBe('300px');
+        expect(host.reload).not.toHaveBeenCalled();
+      });
+
+      it('rejects a missing source at the expected origin', async () => {
+        const host = await loadHost();
+        host.send({ type, height: 450 }, host.origin, null);
+        expect(host.frame.style.height).toBe('300px');
+        expect(host.reload).not.toHaveBeenCalled();
+      });
+    });
+
+    it('reloads exactly once for a trusted reload message without resizing', async () => {
+      const host = await loadHost();
+      host.send({ type: 'salsa:reload' });
+      expect(host.reload).toHaveBeenCalledTimes(1);
+      expect(host.frame.style.height).toBe('300px');
+    });
   });
 
   it("never puts the bank's API key in the page", async () => {
